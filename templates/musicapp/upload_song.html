@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %} Upload a Song {% endblock title %}
+{% block body %}
+
+<section class="mt-hero">
+  <h3>Upload a Song</h3>
+  <div class="mt-rule"></div>
+</section>
+
+<p style="color: var(--text-muted); max-width:480px;">
+  Submitted songs go into a review queue and won't appear publicly until an admin approves them.
+</p>
+
+<form method="post" enctype="multipart/form-data" style="max-width:480px;">
+  {% csrf_token %}
+  {% for field in form %}
+  <div style="margin-bottom:16px;">
+    <label style="display:block; color: var(--text-muted); font-size:0.85rem; margin-bottom:4px;">{{ field.label }}</label>
+    {{ field }}
+    {% if field.errors %}
+    <div style="color: var(--mood-angry); font-size:0.78rem; margin-top:4px;">{{ field.errors|striptags }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <button type="submit" class="mt-btn mt-btn-primary">Submit for review</button>
+</form>
+
+{% endblock body %}

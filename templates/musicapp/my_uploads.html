@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %} My Uploads {% endblock title %}
+{% block body %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
+{% endif %}
+
+<section class="mt-hero">
+  <h3>My Uploads</h3>
+  <div class="mt-rule"></div>
+</section>
+
+<p>
+  <a href="{% url 'upload_song' %}" class="mt-btn mt-btn-primary"><i class="fa fa-plus"></i> Upload a Song</a>
+</p>
+
+{% if songs %}
+<table class="mt-table">
+<thead>
+    <tr>
+    <th scope="col">Name</th>
+    <th scope="col">Artist</th>
+    <th scope="col">Mood</th>
+    <th scope="col">Status</th>
+    </tr>
+</thead>
+<tbody>
+    {% for song in songs %}
+    <tr>
+        <td><a href="{% url 'detail' song.song_id %}">{{song.name}}</a></td>
+        <td>{{song.artist}}</td>
+        <td>{{song.mood}}</td>
+        <td>
+            <span class="mt-badge mt-badge--{{ song.status|lower }}">{{song.status}}</span>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% else %}
+<p style="color: var(--text-muted);">You haven't uploaded any songs yet.</p>
+{% endif %}
+
+{% endblock body %}

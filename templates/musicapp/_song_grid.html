@@ -1,0 +1,17 @@
+{% load static %}
+<div class="mt-grid">
+  {% for song in songs %}
+  <div class="mt-card">
+    <img src="{{ song.image.url }}" alt="{{ song.name }}">
+    <span class="mt-mood-dot mt-mood-dot--{{ song.mood|lower }}" title="{{ song.mood }}"></span>
+    <div class="mt-card-overlay">
+      <a href="{% url 'player' song.song_id %}" title="Play"><i class="fa fa-play"></i></a>
+      <a href="{% url 'detail' song.song_id %}" title="Details"><i class="fa fa-info-circle"></i></a>
+    </div>
+    <div class="mt-card-body">
+      <div class="mt-card-name">{{ song.name }}</div>
+      <div class="mt-card-artist">{{ song.artist }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

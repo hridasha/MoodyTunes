@@ -1,0 +1,654 @@
+:root {
+  --bg: #121016;
+  --surface: #1d1a22;
+  --surface-raised: #262230;
+  --text: #f3efe9;
+  --text-muted: #948fa0;
+  --brand: #ff6f59;
+  --mood-happy: #f5b942;
+  --mood-sad: #5c7cfa;
+  --mood-angry: #e4483c;
+  --mood-fear: #9b6bd9;
+  --mood-neutral: #7c8591;
+  --current-mood-color: var(--brand);
+  --rail-width: 76px;
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Manrope", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Consolas", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+}
+
+.mt-body {
+  margin-left: var(--rail-width);
+  min-height: 100vh;
+  padding: 32px 40px 120px 40px;
+}
+
+/* Nav rail */
+.mt-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--rail-width);
+  background: var(--surface);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  z-index: 900;
+}
+
+.mt-rail img.mt-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+
+.mt-rail-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.mt-rail-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 18px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mt-rail-links a:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.mt-rail-links a.active {
+  color: var(--text);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+/* Headings */
+.mt-hero {
+  margin: 0 0 28px 0;
+}
+
+.mt-hero h1,
+.mt-hero h3,
+.mt-hero h5 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.01em;
+}
+
+.mt-hero .mt-rule {
+  width: 64px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--mt-rule-color, var(--brand));
+}
+
+.mt-hero--happy { --mt-rule-color: var(--mood-happy); }
+.mt-hero--sad { --mt-rule-color: var(--mood-sad); }
+.mt-hero--angry { --mt-rule-color: var(--mood-angry); }
+.mt-hero--fear { --mt-rule-color: var(--mood-fear); }
+.mt-hero--neutral { --mt-rule-color: var(--mood-neutral); }
+
+/* Buttons */
+.mt-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  background: var(--surface-raised);
+  color: var(--text);
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.mt-btn:hover {
+  background: #322c3c;
+}
+
+.mt-btn:active {
+  transform: scale(0.97);
+}
+
+.mt-btn-primary {
+  background: var(--brand);
+  color: #1a0f0b;
+}
+
+.mt-btn-primary:hover {
+  filter: brightness(1.08);
+  background: var(--brand);
+}
+
+.mt-btn-danger {
+  background: var(--mood-angry);
+  color: #1a0f0b;
+}
+
+.mt-btn-xs {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+}
+
+.mt-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Forms */
+.mt-input,
+.mt-select {
+  font-family: var(--font-body);
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.mt-input:focus,
+.mt-select:focus,
+.mt-btn:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+input[type="file"] {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.mt-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.mt-filter-bar .mt-input {
+  flex: 1 1 320px;
+}
+
+/* Song card grid */
+.mt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 18px;
+}
+
+.mt-card {
+  position: relative;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mt-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+
+.mt-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.mt-card-body {
+  margin-top: 10px;
+}
+
+.mt-card-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mt-card-artist {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mt-mood-dot {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.mt-mood-dot--happy { background: var(--mood-happy); }
+.mt-mood-dot--sad { background: var(--mood-sad); }
+.mt-mood-dot--angry { background: var(--mood-angry); }
+.mt-mood-dot--fear { background: var(--mood-fear); }
+.mt-mood-dot--neutral { background: var(--mood-neutral); }
+.mt-mood-dot--non { display: none; }
+
+.mt-card-overlay {
+  position: absolute;
+  inset: 12px 12px auto 12px;
+  height: calc(100% - 24px);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mt-card:hover .mt-card-overlay {
+  opacity: 1;
+}
+
+.mt-card-overlay a {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.mt-card-overlay a:hover {
+  background: var(--brand);
+  color: #1a0f0b;
+}
+
+/* Table (playlist songs / favourites) */
+.mt-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mt-table th,
+.mt-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.9rem;
+}
+
+.mt-table th {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mt-table audio {
+  width: 100%;
+  max-width: 260px;
+}
+
+/* Alerts */
+.mt-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mt-badge--approved { background: color-mix(in srgb, var(--mood-happy) 25%, transparent); color: var(--mood-happy); }
+.mt-badge--pending { background: color-mix(in srgb, var(--mood-neutral) 30%, transparent); color: var(--text); }
+.mt-badge--rejected { background: color-mix(in srgb, var(--mood-angry) 25%, transparent); color: var(--mood-angry); }
+
+.mt-stars {
+  display: flex;
+  align-items: center;
+}
+
+.mt-star {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--mood-happy);
+  font-size: 1.1rem;
+  padding: 2px;
+}
+
+.mt-alert {
+  background: var(--surface-raised);
+  border-left: 4px solid var(--brand);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+/* Modal (vanilla replacement for the old Bootstrap "Create Playlist" dialog) */
+.mt-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1200;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-modal-backdrop.open {
+  display: flex;
+}
+
+.mt-modal {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 24px;
+  width: 320px;
+  max-width: 90vw;
+}
+
+.mt-modal h5 {
+  font-family: var(--font-display);
+  margin-top: 0;
+}
+
+.mt-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* Persistent player bar (signature: mood-glow) */
+#mt-player-bar {
+  position: fixed;
+  bottom: 0;
+  left: var(--rail-width);
+  right: 0;
+  z-index: 1000;
+  display: none;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--current-mood-color) 28%, var(--surface)), var(--surface));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  transition: background 0.6s ease;
+  padding: 12px 24px;
+  align-items: center;
+  gap: 16px;
+}
+
+#mt-player-bar.mt-visible {
+  display: flex;
+}
+
+#mt-player-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 0 2px var(--current-mood-color);
+}
+
+.mt-player-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
+
+#mt-player-song {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+#mt-player-artist {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+#mt-audio {
+  display: none;
+}
+
+.mt-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mt-player-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.mt-player-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mt-player-btn-main {
+  width: 40px;
+  height: 40px;
+  background: var(--current-mood-color);
+  color: #1a0f0b;
+}
+
+.mt-player-btn-main:hover {
+  filter: brightness(1.1);
+  background: var(--current-mood-color);
+}
+
+.mt-player-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 160px;
+}
+
+.mt-time {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  min-width: 34px;
+  text-align: center;
+}
+
+.mt-player-progress input[type="range"],
+.mt-player-volume input[type="range"] {
+  accent-color: var(--current-mood-color);
+}
+
+#mt-seek {
+  flex: 1;
+}
+
+.mt-player-volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.mt-player-volume input[type="range"] {
+  width: 80px;
+}
+
+@media (max-width: 900px) {
+  .mt-player-progress,
+  .mt-player-volume {
+    display: none;
+  }
+}
+
+/* Auth pages */
+.mt-auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+.mt-auth-card {
+  display: flex;
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 720px;
+  width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.mt-auth-art {
+  flex: 1 1 260px;
+  background: var(--surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.mt-auth-art img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.mt-auth-form {
+  flex: 1 1 320px;
+  padding: 40px;
+}
+
+.mt-auth-form h2 {
+  font-family: var(--font-display);
+  margin-top: 0;
+}
+
+.mt-auth-form input[type="text"],
+.mt-auth-form input[type="password"],
+.mt-auth-form input[type="email"] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-family: var(--font-body);
+}
+
+.mt-auth-form input[type="submit"] {
+  width: 100%;
+  background: var(--brand);
+  color: #1a0f0b;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.mt-auth-form label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.mt-auth-form .invalid-feedback,
+.mt-auth-form .errorlist {
+  color: var(--mood-angry);
+  font-size: 0.78rem;
+  margin: -8px 0 12px 0;
+  list-style: none;
+  padding: 0;
+}
+
+.mt-auth-form .helptext {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  display: block;
+  margin: -8px 0 12px 0;
+}
+
+.mt-auth-form .signup {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 14px;
+}
+
+.mt-auth-form .signup a {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .mt-auth-card {
+    flex-direction: column;
+  }
+}

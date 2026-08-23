@@ -45,7 +45,19 @@ INSTALLED_APPS = [
     'musicapp.apps.MusicappConfig',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
@@ -139,3 +151,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID', default='')
+SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET', default='')
+SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI', default='')

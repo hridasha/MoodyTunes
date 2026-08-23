@@ -1,74 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %} Recent {% endblock title %}
 {% block body %}
-<br>
 
+<section class="mt-hero">
+  <h3>Recent</h3>
+  <div class="mt-rule"></div>
+</section>
 
-<div class="row" style="margin-left: 150px">
-  
-  {% if recent_songs %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">RECENT</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in recent_songs  %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h5 class="songname"style="margin-top: 37px; margin-bottom: -27px;">{{song.name}}</h5>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-    {% endif %}
-  </div>
-</div>
-<br>
-<br>
-<br>
+{% if recent_songs %}
+{% include 'musicapp/_song_grid.html' with songs=recent_songs %}
+{% else %}
+<p style="color: var(--text-muted);">Nothing played yet.</p>
+{% endif %}
 
-<footer class="footer">
-  <div
-    class="player"
-    style="
-      padding-left: 10px;
-      padding-top: 10px;
-      background-color: #ff7700;
-      margin-left: 100px;
-    "
-  >
-    <div class="left">
-      <img
-        src="{{last_played.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white; text-decoration: none;">{{last_played.name}}</a>
-        <a class="artist" style="margin-left: 15px; color: white; text-decoration: none;">{{last_played.artist}}</a>
-      </div>
-      <div class="bottom">
-        <audio controls="" name="media" style="
-            margin-left: 20px;
-            margin-bottom: 10px;
-            width: 1230px;
-            height: 30px;"
-        >
-        <source src="{{last_played.song.url}}" type="audio/mpeg" />
-        </audio>
-      </div>
-    </div>
-  </div>
-</footer>
 {% endblock body %}
-

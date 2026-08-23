@@ -2,48 +2,105 @@
 {% block title %} Playlist Songs {% endblock title %}
 {% block body %}
 
-<br>
 {% if messages %}
-<ul class="messages" style="width: 600px;margin-left:400px;">
-    {% for message in messages %}
-        <div class="alert alert-success" style="background-color: #ff7700a3;">
-        <strong>Success!</strong> {{message}}
-        <button type="button" class="close" data-dismiss="alert" style="float: right;" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    {% endfor %}
-</ul>
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
 {% endif %}
-<br>
-<br>
-<center>
-<h3>{{playlist_name}}</h3>
-</center>
-<table class="table table-hover " style="margin-left: 120px; background-color: #ff7700a3;">
+
+<section class="mt-hero">
+  <h3>{{group.name}}</h3>
+  <div class="mt-rule"></div>
+</section>
+
+<div style="max-width:480px; margin-bottom:24px; background:var(--surface); border-radius:12px; padding:16px;">
+  <div style="font-family: var(--font-mono); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Collaborators</div>
+  <p style="margin:0 0 10px 0;">Owner: {{group.owner.username}}</p>
+  {% for collaborator in group.collaborators.all %}
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+    <span>{{collaborator.username}}</span>
+    {% if is_owner %}
+    <form method="post" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" name="remove_collaborator" value="{{collaborator.id}}" class="mt-btn mt-btn-xs mt-btn-danger">Remove</button>
+    </form>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p style="color: var(--text-muted); font-size:0.85rem;">No collaborators yet.</p>
+  {% endfor %}
+
+  {% if is_owner %}
+  <form method="post" style="display:flex; gap:6px; margin-top:10px;">
+    {% csrf_token %}
+    <input type="text" class="mt-input" name="add_collaborator" placeholder="Username" style="flex:1;" required>
+    <button type="submit" class="mt-btn mt-btn-primary">Add</button>
+  </form>
+  {% else %}
+  <form method="post" style="margin-top:10px;">
+    {% csrf_token %}
+    <button type="submit" name="leave_playlist" value="1" class="mt-btn mt-btn-danger">Leave Playlist</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if songs %}
+<p>
+  <button type="button" class="mt-btn mt-btn-primary" onclick="mtPlayAll()">Play All</button>
+  <button type="button" class="mt-btn" onclick="mtShuffle()">Shuffle</button>
+</p>
+{% endif %}
+
+<table class="mt-table">
 <thead>
     <tr>
     <th scope="col">#</th>
     <th scope="col">Song Name</th>
     <th scope="col">Singer</th>
     <th scope="col">Song</th>
+    <th scope="col">Order</th>
+    <th scope="col"></th>
     </tr>
 </thead>
 <tbody>
-    {% if songs %}
     {% for song in songs %}
-    <tr >
-        <th scope="row" >{{forloop.counter}}</th>
-        <td><a href="{% url 'detail' song.song_id %}" style="text-decoration: none; color: black; " >{{song.name}} </a></td>
+    <tr>
+        <th scope="row">{{forloop.counter}}</th>
+        <td><a href="{% url 'detail' song.song_id %}">{{song.name}}</a></td>
         <td>{{song.artist}}</td>
         <td>
-            <audio controls style="width: 80%;"> <source src="{{ song.song_file.url }}" type="audio/mpeg"> </audio>
+            <audio controls><source src="{{ song.song_file.url }}" type="audio/mpeg"></audio>
+        </td>
+        <td>
+            <form method="post" action="{% url 'move_playlist_song' group.id song.song_id 'up' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="mt-btn mt-btn-xs" {% if forloop.first %}disabled{% endif %}>&uarr;</button>
+            </form>
+            <form method="post" action="{% url 'move_playlist_song' group.id song.song_id 'down' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="mt-btn mt-btn-xs" {% if forloop.last %}disabled{% endif %}>&darr;</button>
+            </form>
+        </td>
+        <td>
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" name="remove_song" value="{{song.song_id}}" class="mt-btn mt-btn-xs mt-btn-danger">Remove</button>
+            </form>
         </td>
     </tr>
     {% endfor %}
-    {% endif %}
 </tbody>
 </table>
 
-
+{{ songs_json|json_script:"songs-data" }}
+<script>
+  function mtPlayAll() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(songs, 0);
+  }
+  function mtShuffle() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(MTPlayer.shuffleQueue(songs), 0);
+  }
+</script>
 {% endblock body %}

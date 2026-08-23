@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %} How Are You Feeling {% endblock title %}
+{% block body %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
+{% endif %}
+
+<div style="display:flex; flex-direction:column; align-items:center; margin-top:40px; text-align:center;">
+  <h3 style="font-family: var(--font-display); margin-bottom: 24px;">How are you feeling today?</h3>
+
+  <form method="post" style="width:480px; max-width:90vw;" onsubmit="mtOnSubmit(this)">
+    {% csrf_token %}
+    <textarea name="text" class="mt-input" rows="5" style="width:100%; resize:vertical;"
+              placeholder="Tell us what's on your mind..." required></textarea>
+    <button type="submit" id="mt-text-submit" class="mt-btn mt-btn-primary" style="margin-top:16px; padding:12px 32px; font-size:1rem;">
+      Find my mood
+    </button>
+  </form>
+
+  <script>
+    function mtOnSubmit(form) {
+      var btn = document.getElementById('mt-text-submit');
+      btn.disabled = true;
+      btn.textContent = 'Analyzing… (can take ~20-30s)';
+    }
+  </script>
+
+  <p style="margin-top:24px;"><a href="{% url 'cam' %}" style="color: var(--brand);">Prefer to use your webcam instead? →</a></p>
+</div>
+
+{% endblock body %}

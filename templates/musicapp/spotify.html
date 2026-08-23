@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Spotify {% endblock title %}
+{% block body %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
+{% endif %}
+
+<section class="mt-hero">
+  <h3>Spotify</h3>
+  <div class="mt-rule"></div>
+</section>
+
+{% if not configured %}
+<p style="color: var(--text-muted);">Spotify integration is not configured on this server (missing API credentials).</p>
+{% elif not connected %}
+<p style="color: var(--text-muted); max-width:480px;">
+  Connect your Spotify account to search its catalog and play full tracks in-app.
+  In-app playback needs Spotify Premium on the connected account (Web Playback SDK
+  requirement) — accounts without Premium can still search and open results in Spotify.
+  This app is in Spotify Development Mode, so only accounts allowlisted in the
+  Spotify Developer Dashboard can connect.
+</p>
+<a href="{% url 'spotify_connect' %}" class="mt-btn mt-btn-primary" style="margin-top:12px;">
+  <i class="fa fa-spotify"></i> Connect Spotify
+</a>
+{% else %}
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+  <span class="mt-badge {% if is_premium %}mt-badge--approved{% else %}mt-badge--pending{% endif %}">
+    {% if is_premium %}Premium{% else %}{{ product|default:"Free" }}{% endif %}
+  </span>
+  <form method="post" action="{% url 'spotify_disconnect' %}">
+    {% csrf_token %}
+    <button type="submit" class="mt-btn mt-btn-xs mt-btn-danger">Disconnect</button>
+  </form>
+</div>
+
+{% if not is_premium %}
+<div class="mt-alert">Play-in-app requires Spotify Premium on this account. You can still search and open tracks in Spotify.</div>
+{% endif %}
+
+<div id="mt-spotify-status" style="color: var(--text-muted); font-size:0.85rem; margin-bottom:12px;"></div>
+<div id="mt-spotify-now-playing" style="font-family: var(--font-display); margin-bottom:20px; min-height:1.2em;"></div>
+
+<form class="mt-filter-bar" onsubmit="return mtSpotifySearch(event)">
+  <input type="text" id="mt-spotify-query" class="mt-input" placeholder="Search Spotify for a song or artist">
+  <button type="submit" class="mt-btn mt-btn-primary">Search</button>
+</form>
+
+<div id="mt-spotify-results" class="mt-grid" style="margin-top:20px;"></div>
+
+<script src="{% static 'musicapp/js/spotify_player.js' %}"></script>
+<script>
+  MTSpotify.init({
+    status: document.getElementById('mt-spotify-status'),
+    nowPlaying: document.getElementById('mt-spotify-now-playing'),
+  });
+
+  function mtSpotifySearch(evt) {
+    evt.preventDefault();
+    var q = document.getElementById('mt-spotify-query').value.trim();
+    var results = document.getElementById('mt-spotify-results');
+    if (!q) return false;
+    results.innerHTML = '<p style="color: var(--text-muted);">Searching…</p>';
+    fetch('{% url "spotify_search" %}?q=' + encodeURIComponent(q))
+      .then(function (resp) { return resp.json(); })
+      .then(function (data) {
+        if (data.error) {
+          results.innerHTML = '<p style="color: var(--text-muted);">' + data.error + '</p>';
+          return;
+        }
+        if (!data.tracks.length) {
+          results.innerHTML = '<p style="color: var(--text-muted);">No results.</p>';
+          return;
+        }
+        results.innerHTML = '';
+        data.tracks.forEach(function (t) {
+          var card = document.createElement('div');
+          card.className = 'mt-card';
+          card.innerHTML =
+            '<img src="' + t.image + '" alt="' + t.name + '">' +
+            '<div class="mt-card-overlay">' +
+            '<a href="#" title="Play"><i class="fa fa-play"></i></a>' +
+            '<a href="' + t.external_url + '" target="_blank" rel="noopener" title="Open in Spotify"><i class="fa fa-external-link"></i></a>' +
+            '</div>' +
+            '<div class="mt-card-body">' +
+            '<div class="mt-card-name">' + t.name + '</div>' +
+            '<div class="mt-card-artist">' + t.artist + '</div>' +
+            '</div>';
+          card.querySelector('.mt-card-overlay a').addEventListener('click', function (e) {
+            e.preventDefault();
+            MTSpotify.playTrack(t.uri);
+          });
+          results.appendChild(card);
+        });
+      })
+      .catch(function () {
+        results.innerHTML = '<p style="color: var(--text-muted);">Search failed.</p>';
+      });
+    return false;
+  }
+</script>
+{% endif %}
+
+{% endblock body %}

@@ -1,181 +1,82 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %} Detail {% endblock title %}
-{% load crispy_forms_tags %}
-{% block header %}
-<style>
-    .heart {
-        font-size: 25px;
-        color: red;
-    }
-</style>
-{% endblock header %}
 {% block body %}
-<br>
+
 {% if messages %}
-<ul class="messages" style="width: 600px;margin-left:400px; ">
-    {% for message in messages %}
-    <div class="alert alert-success" style="background-color: #ff7700a0; text-align: center;">
-        <strong><h3>Success!</h3></strong> {{message}}
-        <button type="button" style="float: right;" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button> 
-    </div>
-    {% endfor %}
-</ul>
+{% for message in messages %}
+<div class="mt-alert">{{ message }}</div>
+{% endfor %}
 {% endif %}
-<br>
-<div class="detail" style=" margin-left: 200px;">
-    <div class="card">
-        <div class="container-fliud">
-            <div class="wrapper row">
-                <div class="preview col-md-5">
 
-                    <div class="preview-pic tab-content">
-                        <div class="tab-pane active"><img src="{{songs.image.url}}" height="300" width="300"
-                                style="padding:20px;border-radius: 60px 60px 60px 60px;"></div>
-                    </div>
+<div style="display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start;">
+  <img src="{{songs.image.url}}" alt="{{songs.name}}"
+       style="width:280px; height:280px; object-fit:cover; border-radius:16px;">
 
-                </div>
-                <div class="details col-md-6">
-                    <br>
-                    <h2 class="product-title" ><b>Name: {{songs.name}}</b></h2>
-                    <h4>Artist: {{songs.artist}}</h4>
-                    <br>
-                     <form method="post">
-                        {% csrf_token %}
-                        <button style="float: left;" type="button" class="btn btn-primary" data-toggle="modal"
-                            data-target="#exampleModal" data-whatever="@mdo"><i class="fa fa-plus" aria-hidden="true"></i> Create New Playlist</button>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                            aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">New Playlist</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form>
-                                            <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Name</label>
-                                                <input type="text" class="form-control" id="recipient-name"
-                                                    name="playlist">
-                                            </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" style="margin-top:-143px;"
-                                            data-dismiss="modal">Close</button>
-                                        <button type="Submit" class="btn btn-primary">Create Playlist</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+  <div style="flex:1 1 280px;">
+    <h2 style="font-family: var(--font-display); margin: 0 0 4px 0;">{{songs.name}}</h2>
+    <p style="color: var(--text-muted); font-family: var(--font-mono); margin-top:0;">{{songs.artist}}</p>
+    {% if songs.status != 'Approved' %}
+    <span class="mt-badge mt-badge--{{ songs.status|lower }}">{{songs.status}}</span>
+    {% endif %}
 
-                    <form method="post">
-                        {% csrf_token %}
-                        <select style="margin-left: 188px;width: 170px;margin-top: -132px; height: 36px;" class="btn btn-success"
-                            onChange="form.submit();" name="playlist">
-                            <option selected="selected" disabled style="color: black;">Add to Playlist</option>
-                            {% if playlists %}
-                            {% for playlist in playlists %}
-                            <option value={{playlist.playlist_name}}>{{playlist.playlist_name}}</option>
-                            {% endfor %}
-                            {% endif %}
-                        </select>
-                    </form>
+    <form method="post" action="{% url 'rate_song' songs.song_id %}" class="mt-stars" style="margin-bottom:12px;">
+      {% csrf_token %}
+      {% for i in "12345" %}
+      <button type="submit" name="value" value="{{forloop.counter}}" class="mt-star" title="Rate {{forloop.counter}}">
+        <i class="fa {% if forloop.counter <= user_rating %}fa-star{% else %}fa-star-o{% endif %}"></i>
+      </button>
+      {% endfor %}
+      <span style="color: var(--text-muted); font-size:0.85rem; margin-left:8px;">
+        {% if avg_rating %}Avg {{ avg_rating|floatformat:1 }} ({{ rating_count }} rating{{ rating_count|pluralize }}){% else %}No ratings yet{% endif %}
+      </span>
+    </form>
 
+    <p>
+      <button type="button" class="mt-btn mt-btn-primary" onclick="mtOpenModal()">
+        <i class="fa fa-plus"></i> Create New Playlist
+      </button>
+    </p>
 
-                    <form method="post">
-                        {% csrf_token %}
-                        {% if is_favourite %}
-                        <span class="d-flex align-items-center mt-2 ml-2">
-                            <!-- <i class="heart fa fa-heart my-auto"></i> -->
-                            <button type="submit" name="rm-fav" class="btn btn-danger btn-block"
-                                style="width: 358px;margin-left:-9px;background-color: red;margin-top: 21px;">Remove from Favourites</button>
-                        </span>
-                        {% else %}
-                        <span class="d-flex align-items-center mt-2 ml-2">
-                            <button type="submit" name="add-fav" class="btn btn-danger btn-block"
-                                style="width: 358px;margin-left:-9px;background-color: red; margin-top: 21px;"><i class="heart fa fa-heart-o my-auto" style="color:white"></i> Add to Favourites</button>
-                        </span>
-                        {% endif %}
-                    </form>
+    <form method="post">
+      {% csrf_token %}
+      <select class="mt-select" onChange="form.submit();" name="add_to_group">
+        <option selected disabled>Add to Playlist</option>
+        {% for playlist in playlists %}
+        <option value="{{playlist.id}}">{{playlist.name}}</option>
+        {% endfor %}
+      </select>
+    </form>
 
-
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<footer class="footer ">
-  <div
-    class="player"
-    style="width: 98%; padding-left: 10px; padding-top: 10px; background-color: #ff7700; margin-left: 100px;">
-    <div class="left">
-      <img
-        src="{{songs.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white; text-decoration: none;">{{songs.name}}</a>
-        <a class="artist" style="margin-left: 15px; color: white; text-decoration: none;">{{songs.artist}}</a>
-      </div>
-      <div class="bottom">
-        <audio controls autoplay name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; ">  <source src="{{songs.song_file.url}}" type="audio/mpeg" /></audio>
-      </div>
-    </div>
+    <form method="post" style="margin-top:12px;">
+      {% csrf_token %}
+      {% if is_favourite %}
+      <button type="submit" name="rm-fav" class="mt-btn mt-btn-danger">Remove from Favourites</button>
+      {% else %}
+      <button type="submit" name="add-fav" class="mt-btn mt-btn-danger"><i class="fa fa-heart-o"></i> Add to Favourites</button>
+      {% endif %}
+    </form>
   </div>
 </div>
-</footer>
-<!-- <footer class="footer">
-  <div
-    class="player"
-    style="
-      padding-left: 10px;
-      padding-top: 10px;
-      background-color: #ff7700;
-      margin-left: 100px;
-    "
-  >
-    <div class="left">
-      <img
-        src="{{last_played.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white">name</a>
-        <a class="artist" style="margin-left: 15px; color: white">artist</a>
-      </div>
-      <div class="bottom">
-        <audio
-          controls=""
-          name="media"
-          style="
-            margin-left: 20px;
-            margin-bottom: 10px;
-            width: 1230px;
-            height: 30px;
-          "
-        >
-          <source src="{{last_played.song.url}}" type="audio/mpeg" />
-        </audio>
-      </div>
-    </div>
-  </div>
-</footer> -->
 
+<div class="mt-modal-backdrop" id="mt-playlist-modal">
+  <div class="mt-modal">
+    <h5>New Playlist</h5>
+    <form method="post">
+      {% csrf_token %}
+      <input type="text" class="mt-input" name="new_playlist_name" placeholder="Playlist name" required style="width:100%;">
+      <div class="mt-modal-actions">
+        <button type="button" class="mt-btn" onclick="mtCloseModal()">Cancel</button>
+        <button type="submit" class="mt-btn mt-btn-primary">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{ song_json|json_script:"song-data" }}
+<script>
+  MTPlayer.playSong(JSON.parse(document.getElementById('song-data').textContent));
+  function mtOpenModal() { document.getElementById('mt-playlist-modal').classList.add('open'); }
+  function mtCloseModal() { document.getElementById('mt-playlist-modal').classList.remove('open'); }
+</script>
 {% endblock body %}
-

@@ -1,191 +1,43 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 {% block body %}
 
-
 {% if recent_songs %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">RECENT</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in recent_songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h5 class="songname"style="margin-top: 37px; margin-bottom: -27px;">{{song.name}}</h5>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  <!-- <a
-    href="{% url 'recent' %}"
-    class="btn btn-primary float-right"
-    style="height: 222px; width: 172px; background-color: #ff7700"
-    ><center style="margin-top: 90px;">
-      View all <i class="fa fa-arrow-right" aria-hidden="true"></i></center
-  ></a> -->
-</div>
+<section class="mt-hero">
+  <h3>Recent</h3>
+  <div class="mt-rule"></div>
+</section>
+{% include 'musicapp/_song_grid.html' with songs=recent_songs %}
+<br><br>
 {% endif %}
-<br><br><br>
+
 {% if all_songs %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">ALL SONGS</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in all_songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play"  aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname"style="margin-top: 37px; margin-bottom: -27px;"><b>{{song.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  <a
-  href="{% url 'allsong' %}"
-  class="btn btn-primary float-right"
-  style="height: 222px; width: 172px; background-color: #ff7700"
-  ><center style="margin-top: 90px;">
-    View all <i class="fa fa-arrow-right" aria-hidden="true"></i></center
-    ></a>
-  </div>
-  {% endif %}
-  <br /><br /><br />
+<section class="mt-hero">
+  <h3>All Songs</h3>
+  <div class="mt-rule"></div>
+</section>
+{% include 'musicapp/_song_grid.html' with songs=all_songs %}
+<p style="margin-top: 16px;"><a href="{% url 'allsong' %}" class="mt-btn">View all <i class="fa fa-arrow-right"></i></a></p>
+<br><br>
+{% endif %}
 
-  {% if english_songs %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">ENGLISH</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in english_songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true" style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname" style="margin-top: 37px; margin-bottom: -27px;"><b>{{song.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  <a
-  href="{% url 'english_songs' %}"
-  class="btn btn-primary float-right"
-  style="height: 222px; width: 172px; background-color: #ff7700"
-  ><center style="margin-top: 90px;">
-    View all <i class="fa fa-arrow-right" aria-hidden="true"></i></center
-    ></a>
-  </div>
-  {% endif %}
-  <br><br><br>
+{% if english_songs %}
+<section class="mt-hero">
+  <h3>English</h3>
+  <div class="mt-rule"></div>
+</section>
+{% include 'musicapp/_song_grid.html' with songs=english_songs %}
+<p style="margin-top: 16px;"><a href="{% url 'english_songs' %}" class="mt-btn">View all <i class="fa fa-arrow-right"></i></a></p>
+<br><br>
+{% endif %}
 
-
-  {% if hindi_songs %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">HINDI</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in hindi_songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname"style="margin-top: 37px; margin-bottom: -27px;"><b>{{song.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  <a
-  href="{% url 'hindi_songs' %}"
-  class="btn btn-primary float-right"
-  style="height: 222px; width: 172px; background-color: #ff7700"><center style="margin-top: 90px;">
-    View all <i class="fa fa-arrow-right" aria-hidden="true"></i></center></a>
-  </div>
-  
-  {% endif %}
-<br />
-<br />
-<br>
-<br><br><br><br><br><br><br>
-<footer class="footer ">
-  <div
-    class="player"
-    style="width: 98%; padding-left: 10px; padding-top: 10px; background-color: #ff7700; margin-left: 100px;">
-    <div class="left">
-      <img
-        src="{{last_played.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white; text-decoration: none;">{{last_played.name}}</a>
-        <a class="artist" style="margin-left: 15px; color: white; text-decoration: none;">{{last_played.artist}}</a>
-      </div>
-      <div class="bottom">
-        {% if first_time %}
-          <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; ">  <source src="{{last_played.song_file.url}}" type="audio/mpeg" /></audio>
-          {% else %}
-          <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; ">  <source src="{{last_played.song_file.url}}" type="audio/mpeg" /></audio>
-          {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-</footer>
-<!-- <footer class="footer ">
-  <div
-    class="player"
-    style="width: 98%; padding-left: 10px; padding-top: 10px; background-color: #ff7700; margin-left: 100px;">
-    <div class="left">
-      <img
-        src="{{last_played.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white">{{last_played.name}}</a>
-        <a class="artist" style="margin-left: 15px; color: white">{{last_played.artist}}</a>
-      </div>
-      <div class="bottom">
-        {% if first_time %}
-        <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; "><source src="{{play_song_index.song.url}}" type="audio/mpeg" /></audio>
-        {% else %}
-        <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; "><source src="{{last_played.song.url}}" type="audio/mpeg" /></audio>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</footer> -->
+{% if hindi_songs %}
+<section class="mt-hero">
+  <h3>Hindi</h3>
+  <div class="mt-rule"></div>
+</section>
+{% include 'musicapp/_song_grid.html' with songs=hindi_songs %}
+<p style="margin-top: 16px;"><a href="{% url 'hindi_songs' %}" class="mt-btn">View all <i class="fa fa-arrow-right"></i></a></p>
+{% endif %}
 
 {% endblock body %}

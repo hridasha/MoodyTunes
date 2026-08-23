@@ -1,21 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %} Fear Songs {% endblock title %}
+{% block title %} Popular {% endblock title %}
 {% block body %}
 
-<section class="mt-hero mt-hero--fear">
-  <h3>Fear Songs</h3>
+<section class="mt-hero">
+  <h3>Popular</h3>
   <div class="mt-rule"></div>
 </section>
 
-{% if fear_song %}
+{% if songs %}
 <p>
   <button type="button" class="mt-btn mt-btn-primary" onclick="mtPlayAll()">Play All</button>
   <button type="button" class="mt-btn" onclick="mtShuffle()">Shuffle</button>
 </p>
+{% include 'musicapp/_song_grid.html' %}
+{% else %}
+<p style="color: var(--text-muted);">No rated songs yet — rate a song from its detail page to see it here.</p>
 {% endif %}
-
-{% include 'musicapp/_song_grid.html' with songs=fear_song %}
 
 {{ songs_json|json_script:"songs-data" }}
 <script>

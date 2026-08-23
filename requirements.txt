@@ -17,6 +17,7 @@ decorator==5.1.1
 deepface==0.0.79
 Django==4.1.7
 django-crispy-forms==2.0
+djangorestframework==3.14.0
 executing==1.2.0
 filelock==3.10.0
 fire==0.5.0
@@ -87,9 +88,11 @@ tensorflow-intel==2.11.1
 tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.2.0
 tomli==2.0.1
+torch==2.13.0+cpu
 tornado==6.2
 tqdm==4.65.0
 traitlets==5.9.0
+transformers==5.15.1
 typing_extensions==4.5.0
 tzdata==2022.7
 urllib3==1.26.15

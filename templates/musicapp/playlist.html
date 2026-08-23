@@ -1,32 +1,46 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% block title %} Playlists {% endblock title %}
 {% block body %}
-<br>
 
+<section class="mt-hero">
+  <h3>All Playlists</h3>
+  <div class="mt-rule"></div>
+</section>
 
-<header class="section-heading" style="margin-left: 200px;">
-    <h3 class="section-title">All Playlists</h3>
-</header>
-
-<div class="row " style="margin-left: 250px;" >
-    {% if playlists %}
-    {% for playlist in playlists %}
-    <div class="col-md-3">
-    <div class="thumbnail">
-        <a href="{% url 'playlist_songs' playlist.playlist_name %}">
-        <img src="{% static 'musicapp/img/bg.jpg' %}" class="img-responsive" height="200" width="200">
-        </a>
-        <center>
-        <h4 style="margin-left:150px">{{playlist.playlist_name}}</h4>
-        </center>
+{% if playlists %}
+<div class="mt-grid">
+  {% for playlist in playlists %}
+  <div class="mt-card">
+    <a href="{% url 'playlist_songs' playlist.id %}">
+      <img src="{% static 'musicapp/img/bg.jpg' %}" alt="{{playlist.name}}">
+    </a>
+    <div class="mt-card-body">
+      <div class="mt-card-name">{{playlist.name}}
+        {% if playlist.owner_id != request.user.id %}
+        <span class="mt-badge mt-badge--pending" style="margin-left:6px;">Shared</span>
+        {% endif %}
+      </div>
+      {% if playlist.owner_id == request.user.id %}
+      <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+        <form method="post" action="{% url 'rename_playlist' playlist.id %}" style="display:flex; gap:4px;">
+          {% csrf_token %}
+          <input type="text" class="mt-input" name="new_name" placeholder="New name" style="width:100px; padding:4px 8px; font-size:0.75rem;" required>
+          <button type="submit" class="mt-btn mt-btn-xs">Rename</button>
+        </form>
+        <form method="post" action="{% url 'delete_playlist' playlist.id %}"
+              onsubmit="return confirm('Delete this playlist?');">
+          {% csrf_token %}
+          <button type="submit" class="mt-btn mt-btn-xs mt-btn-danger">Delete</button>
+        </form>
+      </div>
+      {% endif %}
     </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>There isn't any playlist! First create new playlist.</p>
-    {% endif %}
+  </div>
+  {% endfor %}
 </div>
-
+{% else %}
+<p style="color: var(--text-muted);">There isn't any playlist yet! Create one from a song's detail page.</p>
+{% endif %}
 
 {% endblock body %}

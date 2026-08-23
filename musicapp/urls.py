@@ -1,17 +1,36 @@
 from django.urls import path
 from . import views
+from . import spotify_views
 
 # Add URLConf
 urlpatterns = [
 
      path('', views.index, name='index'),
+     path('spotify/', spotify_views.spotify_hub, name='spotify_hub'),
+     path('spotify/connect/', spotify_views.spotify_connect, name='spotify_connect'),
+     path('spotify/callback/', spotify_views.spotify_callback, name='spotify_callback'),
+     path('spotify/disconnect/', spotify_views.spotify_disconnect, name='spotify_disconnect'),
+     path('spotify/token/', spotify_views.spotify_token, name='spotify_token'),
+     path('spotify/search/', spotify_views.spotify_search, name='spotify_search'),
      path('<int:id>/', views.detail, name='detail'),
      path('player/<int:id>/', views.player, name='player'),
      path('mymusic/', views.mymusic, name='mymusic'),
+     path('upload/', views.upload_song, name='upload_song'),
+     path('my-uploads/', views.my_uploads, name='my_uploads'),
+     path('mood-history/', views.mood_history, name='mood_history'),
+     path('mood-text/', views.mood_from_text, name='mood_from_text'),
      path('playlist/', views.playlist, name='playlist'),
-     path('playlist/<str:playlist_name>/',
+     path('playlist/<int:group_id>/',
           views.playlist_songs, name='playlist_songs'),
+     path('playlist/<int:group_id>/rename/',
+          views.rename_playlist, name='rename_playlist'),
+     path('playlist/<int:group_id>/delete/',
+          views.delete_playlist, name='delete_playlist'),
+     path('playlist/<int:group_id>/move/<int:song_id>/<str:direction>/',
+          views.move_playlist_song, name='move_playlist_song'),
      path('favourite/', views.favourite, name='favourite'),
+     path('rate/<int:id>/', views.rate_song, name='rate_song'),
+     path('popular/', views.popular_songs, name='popular_songs'),
      path('recent/', views.recent, name='recent'),
      path('hindi_songs/', views.hindi_songs, name='hindi_songs'),
      path('result/', views.happy_song, name='happy_song'),
@@ -23,7 +42,7 @@ urlpatterns = [
      path('allsong/', views.allsong, name='allsong'),
      path('search/', views.search, name='search'),
      path('cam/', views.cam, name="cam"),
-     path('mooddet/', views.mooddet, name="mooddet"),
+     path('detect_mood/', views.detect_mood, name="detect_mood"),
      path('happy_song/', views.happy_song, name="happy_song"),
      path('sad_song/', views.sad_song, name="sad_song"),
      path('neutral_song/', views.neutral_song, name="neutral_song"),

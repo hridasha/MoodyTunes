@@ -1,13 +1,98 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %} camera {% endblock title %}
+{% block title %} Mood Camera {% endblock title %}
 {% block body %}
 
-<center>
-    <h1  style="margin-top: 200px;"><a href="{% url 'mooddet' %}"><i class="fa fa-camera" style=" color: rgba(8, 0, 255, 0.532); "></i></a></h1>
-    <p style="font-family: 'Poppins';">
-        <h1>Press R to listen songs based on mood</h1>
-        <h1> Press Q to quit camera <br></h1>
-    </p>
-</center>
+<div style="display:flex; flex-direction:column; align-items:center; margin-top:40px; text-align:center;">
+  <h3 style="font-family: var(--font-display); margin-bottom: 24px;">Detect your mood</h3>
+
+  <video id="mt-cam-video" autoplay playsinline muted
+         style="width:480px; max-width:90vw; border-radius:16px; background:var(--surface);"></video>
+  <canvas id="mt-cam-canvas" style="display:none;"></canvas>
+
+  <div id="mt-cam-error" class="mt-alert" style="display:none; margin-top:16px; max-width:480px;"></div>
+
+  <button type="button" id="mt-cam-capture" class="mt-btn mt-btn-primary" style="margin-top:24px; padding:12px 32px; font-size:1rem;" disabled>
+    <i class="fa fa-camera"></i> Starting camera…
+  </button>
+  <p style="color: var(--text-muted); margin-top:16px;">Uses your webcam locally — the captured frame is sent once for analysis, not streamed.</p>
+  <p style="margin-top:8px;"><a href="{% url 'mood_from_text' %}" style="color: var(--brand);">Prefer to type it out instead? →</a></p>
+</div>
+
+{{ mood_urls|json_script:"mood-urls" }}
+<script>
+(function () {
+  var video = document.getElementById('mt-cam-video');
+  var canvas = document.getElementById('mt-cam-canvas');
+  var errorBox = document.getElementById('mt-cam-error');
+  var captureBtn = document.getElementById('mt-cam-capture');
+  var moodUrls = JSON.parse(document.getElementById('mood-urls').textContent);
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = '';
+  }
+
+  function getCookie(name) {
+    var match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? match.pop() : '';
+  }
+
+  function setReady() {
+    captureBtn.disabled = false;
+    captureBtn.innerHTML = '<i class="fa fa-camera"></i> Detect Mood';
+  }
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (stream) {
+        video.srcObject = stream;
+        video.addEventListener('loadeddata', setReady, { once: true });
+      })
+      .catch(function () {
+        showError('Could not access your webcam. Check your browser\'s camera permission for this site and try again.');
+      });
+  } else {
+    showError('This browser does not support webcam access.');
+  }
+
+  captureBtn.addEventListener('click', function () {
+    errorBox.style.display = 'none';
+    if (!video.videoWidth || !video.videoHeight) {
+      showError('Camera is not ready yet — wait a moment and try again.');
+      return;
+    }
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+    captureBtn.disabled = true;
+    captureBtn.textContent = 'Detecting…';
+
+    fetch('{% url "detect_mood" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({ image: dataUrl }),
+    })
+      .then(function (resp) { return resp.json().then(function (data) { return { ok: resp.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok && moodUrls[result.data.mood]) {
+          window.location.href = moodUrls[result.data.mood];
+        } else {
+          showError(result.data.error || 'Could not detect a mood. Try again.');
+        }
+      })
+      .catch(function () {
+        showError('Something went wrong reaching the server. Try again.');
+      })
+      .finally(function () {
+        captureBtn.disabled = false;
+        captureBtn.innerHTML = '<i class="fa fa-camera"></i> Detect Mood';
+      });
+  });
+})();
+</script>
 {% endblock body %}

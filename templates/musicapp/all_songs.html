@@ -3,92 +3,56 @@
 {% block title %} All Songs {% endblock title %}
 {% block body %}
 
-    <form class="form-horizontal" role="search" method="get" action='' style="margin-left: 120px; margin-top: 50px;">
-      <div class="form-group">
-        <div class="input-group">
-          <div class="input-group">
-            <input type="text" class="form-control input-lg" style=" width: 814px; margin-left: 20px; border-radius: 5px;"
-            name="q" value="{{ request.GET.q }}" placeholder= "Search Songs "/>
+<form class="mt-filter-bar" method="get" action="">
+  <input type="text" class="mt-input" name="q" value="{{ request.GET.q }}" placeholder="Search songs">
 
-            <select name="languages" class="custom-select mx-1" style="border-radius: 5px; height: 42px; margin-left: 12px;">
-              <option selected="selected" disabled>Languages</option>
-              {% if all_languages %}
-                  {% for language in all_languages %}
-                      <option value={{language}}>{{language}}</option>
-                  {% endfor %}
-              {% endif %}
-            </select>
-            <span class='input-group-btn'>
-              <button type="submit" style="border-radius: 5px;margin-top: -152px; background-color: #ff7700; height: 42px; margin-left: 12px;" class="btn btn-primary">Search</button>
-            </span>
-          </div>
-        </div>
-      </div>
-    </form>
+  <select name="mood" class="mt-select">
+    <option value="" {% if not request.GET.mood %}selected{% endif %}>Mood</option>
+    {% for mood in all_moods %}
+      <option value="{{mood}}" {% if request.GET.mood == mood %}selected{% endif %}>{{mood}}</option>
+    {% endfor %}
+  </select>
 
-  {% if not query_search %}
-  <header class="section-heading" style="margin-left: 150px; text-align: center; top: 50px; ">
-    <h5 class="section-title"><b>ALL SONGS</b></h5>
-  </header>
+  <select name="languages" class="mt-select">
+    <option value="" {% if not request.GET.languages %}selected{% endif %}>Languages</option>
+    {% for language in all_languages %}
+      <option value="{{language}}" {% if request.GET.languages == language %}selected{% endif %}>{{language}}</option>
+    {% endfor %}
+  </select>
 
-  {% else %}
-  <header class="section-heading" style="margin-left: 150px; text-align: center; top: 50px; font-size: large  ">
-    <h5 class="section-title"><b> RESULTS</b></h5>
-  </header>
+  <select name="artists" class="mt-select">
+    <option value="" {% if not request.GET.artists %}selected{% endif %}>Artists</option>
+    {% for artist in all_artist %}
+      <option value="{{artist}}" {% if request.GET.artists == artist %}selected{% endif %}>{{artist}}</option>
+    {% endfor %}
+  </select>
 
-  {% endif %}
+  <button type="submit" class="mt-btn mt-btn-primary">Search</button>
+</form>
 
+<section class="mt-hero">
+  <h3>{% if query_search %}Results{% else %}All Songs{% endif %}</h3>
+  <div class="mt-rule"></div>
+</section>
 
+{% if songs %}
+<p>
+  <button type="button" class="mt-btn mt-btn-primary" onclick="mtPlayAll()">Play All</button>
+  <button type="button" class="mt-btn" onclick="mtShuffle()">Shuffle</button>
+</p>
+{% endif %}
 
+{% include 'musicapp/_song_grid.html' %}
 
-<div class="row" style="margin-left: 150px">
-  {% for song in songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id%}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname"style="margin-top: 37px; margin-bottom: -27px;"><b>{{song.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-
-  </div>
-  <br /><br /><br />
-<br>
-<br>
-<br>
-<br>
-
-<footer class="footer ">
-  <div
-    class="player"
-    style="width: 98%; padding-left: 10px; padding-top: 10px; background-color: #ff7700; margin-left: 100px;">
-    <div class="left">
-      <img
-        src="{{last_played.image.url}}"
-        height="90"
-        width="90"
-        style="border-radius: 10px 10px 10px 10px"
-      />
-    </div>
-    <div class="right">
-      <div class="top">
-        <a class="song" style="margin-left: 15px; color: white ; text-decoration: none;">{{last_played.name}}</a>
-        <a class="artist" style="margin-left: 15px; color: white;text-decoration: none;">{{last_played.artist}}</a>
-      </div>
-      <div class="bottom">
-        {% if first_time %}
-        <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; ">  <source src="{{last_played.song_file.url}}" type="audio/mpeg" /></audio>
-        {% else %}
-        <audio controls="" name="media" style="   margin-left: 20px;   margin-bottom: 10px;   width: 1230px;   height: 30px; ">  <source src="{{last_played.song_file.url}}" type="audio/mpeg" /></audio>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-</footer>
+{{ songs_json|json_script:"songs-data" }}
+<script>
+  function mtPlayAll() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(songs, 0);
+  }
+  function mtShuffle() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(MTPlayer.shuffleQueue(songs), 0);
+  }
+</script>
 {% endblock body %}

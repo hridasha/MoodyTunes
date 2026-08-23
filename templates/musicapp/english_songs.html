@@ -1,28 +1,13 @@
 {% extends 'base.html' %}
-
-
+{% load static %}
+{% block title %} English Songs {% endblock title %}
 {% block body %}
 
-<br>
-<!-- English Songs -->
-<header class="section-heading" style="margin-left: 150px; text-align: center; top: 50px; font-size: medium;">
-    <h5 class="section-title">English</h5>
-</header>
+<section class="mt-hero">
+  <h3>English</h3>
+  <div class="mt-rule"></div>
+</section>
 
-<div class="row" style="margin-left: 150px">
-  {% for i in english_songs %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{i.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' i.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' i.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname"style="margin-top: 37px; margin-bottom: -27px;"><b>{{i.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{i.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  </div>
+{% include 'musicapp/_song_grid.html' with songs=english_songs %}
 
 {% endblock body %}

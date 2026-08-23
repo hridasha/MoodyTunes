@@ -3,28 +3,29 @@
 {% block title %} Neutral Songs {% endblock title %}
 {% block body %}
 
-<br><br><br>
+<section class="mt-hero mt-hero--neutral">
+  <h3>Neutral Songs</h3>
+  <div class="mt-rule"></div>
+</section>
+
 {% if neutral_song %}
-<header
-  class="section-heading"
-  style="margin-left: 150px; text-align: center; top: 50px; font-size: medium"
->
-  <h3 class="section-title" style="font-family: 'Poppins';">NEUTRAL SONGS</h3>
-</header>
-<div class="row" style="margin-left: 150px">
-  {% for song in neutral_song %}
-  <div class="card hovereffect" style="height: 222px; width: 172px; margin: 5px">
-    <img src="{{song.image.url}}" class="card-img-top" height="135" width="135" style="border-radius: 8px 8px 8px 8px " alt="..."/>
-    <div class="overlay">
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'player' song.song_id %}"><i class="fa fa-play" aria-hidden="true"style="color: white;"></i></a>
-      <a class="btn btn-outline-dark mt-5 mx-1" href="{% url 'detail' song.song_id %}"><i class="fa fa-info-circle" aria-hidden="true"style="color: white;"></i></a>
-    </div>
-    <div class="card-body">
-      <h6 class="songname"style="margin-top: 37px; margin-bottom: -27px;"><b>{{song.name}}</b></h6>
-      <h6 class="artitname"style="margin-top: 37px; margin-bottom: -27px;">{{song.artist}}</h6>
-    </div>
-  </div>
-  {% endfor %}
-  {% endif %}
-  <br /><br /><br />
+<p>
+  <button type="button" class="mt-btn mt-btn-primary" onclick="mtPlayAll()">Play All</button>
+  <button type="button" class="mt-btn" onclick="mtShuffle()">Shuffle</button>
+</p>
+{% endif %}
+
+{% include 'musicapp/_song_grid.html' with songs=neutral_song %}
+
+{{ songs_json|json_script:"songs-data" }}
+<script>
+  function mtPlayAll() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(songs, 0);
+  }
+  function mtShuffle() {
+    var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    MTPlayer.playQueue(MTPlayer.shuffleQueue(songs), 0);
+  }
+</script>
 {% endblock body %}

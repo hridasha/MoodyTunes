@@ -1,6 +1,8 @@
 import base64
 import json
 import logging
+from collections import Counter
+from datetime import timedelta
 
 from django.shortcuts import render, redirect
 from .models import *
@@ -11,6 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
+from django.utils import timezone
 import cv2
 from deepface import DeepFace
 import numpy as np
@@ -471,12 +474,12 @@ def playlist_songs(request, group_id):
         return redirect('playlist')
 
     entries = Playlist.objects.filter(group=group).order_by('position', 'id')
-    songs = [entry.song for entry in entries]
+    local_songs = [entry.song for entry in entries if entry.song]
 
     if request.method == "POST":
-        if 'remove_song' in request.POST:
-            song_id = request.POST['remove_song']
-            Playlist.objects.filter(group=group, song_id=song_id).delete()
+        if 'remove_entry' in request.POST:
+            entry_id = request.POST['remove_entry']
+            Playlist.objects.filter(group=group, pk=entry_id).delete()
             messages.success(request, "Song removed from playlist!")
             return redirect('playlist_songs', group_id=group.id)
         elif 'add_collaborator' in request.POST and request.user == group.owner:
@@ -497,9 +500,10 @@ def playlist_songs(request, group_id):
             messages.success(request, "You left the playlist.")
             return redirect('playlist')
 
-    context = {'group': group, 'songs': songs,
-               'songs_json': song_queue_json(songs),
-               'is_owner': request.user == group.owner}
+    context = {'group': group, 'entries': entries,
+               'songs_json': song_queue_json(local_songs),
+               'is_owner': request.user == group.owner,
+               'spotify_connected': SpotifyAccount.objects.filter(user=request.user).exists()}
 
     return render(request, 'musicapp/playlist_songs.html', context=context)
 
@@ -532,14 +536,14 @@ def delete_playlist(request, group_id):
 
 
 @login_required(login_url='login')
-def move_playlist_song(request, group_id, song_id, direction):
+def move_playlist_song(request, group_id, entry_id, direction):
     group = PlaylistGroup.objects.filter(pk=group_id).first()
     if not group or not group.can_edit(request.user):
         messages.error(request, "You don't have access to that playlist.")
         return redirect('playlist')
 
     entries = list(Playlist.objects.filter(group=group).order_by('position', 'id'))
-    index = next((i for i, e in enumerate(entries) if e.song_id == song_id), None)
+    index = next((i for i, e in enumerate(entries) if e.id == entry_id), None)
     if index is not None:
         swap_index = index - 1 if direction == 'up' else index + 1
         if 0 <= swap_index < len(entries):
@@ -628,7 +632,34 @@ def mood_history(request):
     for row in summary:
         row['pct'] = round(100 * row['count'] / total) if total else 0
 
-    context = {'logs': logs, 'summary': summary, 'total': total}
+    source_summary = list(
+        MoodLog.objects.filter(user=request.user)
+        .values('source').annotate(count=Count('id')).order_by('-count')
+    )
+
+    today = timezone.localdate()
+    days = [today - timedelta(days=i) for i in range(29, -1, -1)]
+    day_logs = MoodLog.objects.filter(user=request.user, detected_at__date__gte=days[0])
+
+    counts_by_day = {}
+    for entry in day_logs.values('mood', 'detected_at'):
+        day = timezone.localtime(entry['detected_at']).date()
+        counts_by_day.setdefault(day, Counter())[entry['mood']] += 1
+
+    timeline = []
+    for day in days:
+        day_counts = counts_by_day.get(day)
+        dominant = max(day_counts, key=day_counts.get) if day_counts else None
+        timeline.append({
+            'date': day.strftime('%b %d'),
+            'mood': dominant,
+            'count': sum(day_counts.values()) if day_counts else 0,
+        })
+
+    context = {
+        'logs': logs, 'summary': summary, 'total': total,
+        'source_summary': source_summary, 'timeline': timeline,
+    }
     return render(request, 'musicapp/mood_history.html', context)
 
 

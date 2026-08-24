@@ -543,6 +543,172 @@ input[type="file"] {
   }
 }
 
+/* Panels — info boxes (collaborators, status summaries, dashboard sections) */
+.mt-panel {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  max-width: 560px;
+}
+
+.mt-panel-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.mt-panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.mt-panel-row + .mt-panel-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mt-panel form {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mt-panel form .mt-input {
+  flex: 1;
+}
+
+/* Muted / helper text */
+.mt-lede {
+  color: var(--text-muted);
+  max-width: 560px;
+  margin: 0 0 20px 0;
+  line-height: 1.55;
+}
+
+.mt-empty {
+  color: var(--text-muted);
+}
+
+/* Action rows (Play All / Shuffle / Export, etc.) */
+.mt-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Mood picker segmented control */
+.mt-mood-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.mt-mood-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-muted);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.mt-mood-chip:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mt-mood-chip.active {
+  background: var(--mt-chip-color, var(--brand));
+  color: #1a0f0b;
+  border-color: transparent;
+  font-weight: 700;
+}
+
+.mt-mood-chip--happy { --mt-chip-color: var(--mood-happy); }
+.mt-mood-chip--sad { --mt-chip-color: var(--mood-sad); }
+.mt-mood-chip--angry { --mt-chip-color: var(--mood-angry); }
+.mt-mood-chip--fear { --mt-chip-color: var(--mood-fear); }
+.mt-mood-chip--neutral { --mt-chip-color: var(--mood-neutral); }
+
+/* Spotify status line + now-playing readout */
+.mt-status-line {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  min-height: 1.2em;
+}
+
+.mt-now-playing {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin-bottom: 18px;
+  min-height: 1.3em;
+}
+
+/* Selection checkbox over a card image (recommendations export picker) */
+.mt-card-select {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand);
+}
+
+/* Spotify-sourced row badge in a mixed local/Spotify playlist table */
+.mt-badge--spotify {
+  background: color-mix(in srgb, #1db954 25%, transparent);
+  color: #1db954;
+}
+
+/* Mood heatmap (mood history trends) */
+.mt-heatmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 18px);
+  gap: 4px;
+  margin-bottom: 10px;
+  max-width: 640px;
+}
+
+.mt-heatmap-cell {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+/* Small tag row (source breakdown, stats) */
+.mt-tag-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.mt-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
 /* Auth pages */
 .mt-auth-shell {
   min-height: 100vh;

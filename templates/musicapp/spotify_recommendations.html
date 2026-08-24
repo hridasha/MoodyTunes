@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Mood Recommendations {% endblock title %}
+{% block body %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
+{% endif %}
+
+<section class="mt-hero mt-hero--{{ mood|lower }}">
+  <h3>Spotify Picks for Your Mood</h3>
+  <div class="mt-rule"></div>
+</section>
+
+<p class="mt-lede">
+  Spotify retired its audio-feature and recommendation endpoints for new apps, so this matches mood
+  to curated search terms rather than valence/energy scoring — still Spotify's real catalog, just a
+  blunter match.
+</p>
+
+<nav class="mt-mood-picker">
+  {% for m in moods %}
+  <a href="?mood={{ m }}" class="mt-mood-chip mt-mood-chip--{{ m|lower }} {% if m == mood %}active{% endif %}">{{ m }}</a>
+  {% endfor %}
+</nav>
+
+{% if not connected %}
+<p class="mt-empty">Connect your <a href="{% url 'spotify_hub' %}" style="color: var(--brand);">Spotify account</a> to see picks.</p>
+{% elif not tracks %}
+<p class="mt-empty">No results — try a different mood.</p>
+{% else %}
+<form method="post" action="{% url 'spotify_export_tracks' %}">
+  {% csrf_token %}
+  <input type="hidden" name="mood" value="{{ mood }}">
+
+  <div class="mt-status-line" id="mt-spotify-status"></div>
+  <div class="mt-now-playing" id="mt-spotify-now-playing"></div>
+
+  <div class="mt-grid" style="margin-bottom:20px;">
+    {% for t in tracks %}
+    <div class="mt-card">
+      <input type="checkbox" name="uris" value="{{ t.uri }}" checked class="mt-card-select" title="Include in export">
+      <img src="{{ t.image }}" alt="{{ t.name }}">
+      <div class="mt-card-overlay">
+        <a href="#" title="Play" class="mt-spotify-play" data-uri="{{ t.uri }}"><i class="fa fa-play"></i></a>
+        <a href="{{ t.external_url }}" target="_blank" rel="noopener" title="Open in Spotify"><i class="fa fa-external-link"></i></a>
+      </div>
+      <div class="mt-card-body">
+        <div class="mt-card-name">{{ t.name }}</div>
+        <div class="mt-card-artist">{{ t.artist }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-actions">
+    <button type="submit" class="mt-btn mt-btn-primary"><i class="fa fa-spotify"></i> Export Selected to Spotify</button>
+  </div>
+</form>
+
+<script src="{% static 'musicapp/js/spotify_player.js' %}"></script>
+<script>
+  MTSpotify.init({
+    status: document.getElementById('mt-spotify-status'),
+    nowPlaying: document.getElementById('mt-spotify-now-playing'),
+  });
+  document.querySelectorAll('.mt-spotify-play').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      MTSpotify.playTrack(link.dataset.uri);
+    });
+  });
+</script>
+{% endif %}
+
+{% endblock body %}

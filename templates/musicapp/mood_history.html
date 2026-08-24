@@ -3,25 +3,43 @@
 {% block body %}
 
 <section class="mt-hero">
-  <h3>Mood History</h3>
+  <h3>Mood History &amp; Trends</h3>
   <div class="mt-rule"></div>
 </section>
 
 {% if total %}
-<div style="max-width:480px; margin-bottom:32px;">
+<div class="mt-panel">
+  <div class="mt-panel-label">Breakdown</div>
   {% for row in summary %}
   <div style="margin-bottom:10px;">
     <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
       <span>{{ row.mood }}</span>
-      <span style="color: var(--text-muted);">{{ row.count }}</span>
+      <span class="mt-empty">{{ row.count }}</span>
     </div>
-    <div style="background: var(--surface); border-radius:6px; height:8px; overflow:hidden;">
+    <div style="background: var(--bg); border-radius:6px; height:8px; overflow:hidden;">
       <div class="mt-mood-dot--{{ row.mood|lower }}" style="width:{{ row.pct }}%; height:100%; border-radius:6px;"></div>
     </div>
   </div>
   {% endfor %}
 </div>
 
+<div class="mt-panel-label">Last 30 Days</div>
+<div class="mt-heatmap">
+  {% for day in timeline %}
+  <div title="{{ day.date }}{% if day.mood %} — {{ day.mood }} ({{ day.count }}){% else %} — no detections{% endif %}"
+       class="mt-heatmap-cell {% if day.mood %}mt-mood-dot--{{ day.mood|lower }}{% endif %}"></div>
+  {% endfor %}
+</div>
+
+{% if source_summary %}
+<div class="mt-tag-row">
+  {% for row in source_summary %}
+  <span class="mt-tag">{{ row.count }} via {{ row.source|title }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="mt-panel-label">Recent Detections</div>
 <table class="mt-table" style="max-width:480px;">
 <thead>
     <tr>
@@ -37,13 +55,13 @@
         <td><span class="mt-badge" style="background:transparent; color:var(--text);">
             <span class="mt-mood-dot mt-mood-dot--{{ log.mood|lower }}" style="position:static; display:inline-block; margin-right:6px;"></span>{{ log.mood }}
         </span></td>
-        <td style="color: var(--text-muted); font-family: var(--font-mono); font-size:0.78rem;">{{ log.get_source_display }}</td>
+        <td class="mt-empty" style="font-family: var(--font-mono); font-size:0.78rem;">{{ log.get_source_display }}</td>
     </tr>
     {% endfor %}
 </tbody>
 </table>
 {% else %}
-<p style="color: var(--text-muted);">No mood detections yet — try the <a href="{% url 'cam' %}" style="color: var(--brand);">mood camera</a> or <a href="{% url 'mood_from_text' %}" style="color: var(--brand);">type how you feel</a>.</p>
+<p class="mt-empty">No mood detections yet — try the <a href="{% url 'cam' %}" style="color: var(--brand);">mood camera</a> or <a href="{% url 'mood_from_text' %}" style="color: var(--brand);">type how you feel</a>.</p>
 {% endif %}
 
 {% endblock body %}

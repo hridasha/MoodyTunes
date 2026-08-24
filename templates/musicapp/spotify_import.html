@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %} Import from Spotify {% endblock title %}
+{% block body %}
+
+{% if messages %}
+{% for message in messages %}
+<div class="mt-alert">{{message}}</div>
+{% endfor %}
+{% endif %}
+
+<section class="mt-hero">
+  <h3>Import from Spotify</h3>
+  <div class="mt-rule"></div>
+</section>
+
+<p class="mt-lede">
+  Pull your Spotify library into a MoodyTunes playlist. Imported songs stream through the
+  <a href="{% url 'spotify_hub' %}" style="color: var(--brand);">Spotify player</a> — Premium required to play them in-app.
+</p>
+
+<div class="mt-panel">
+  <div class="mt-panel-label">Liked Songs</div>
+  <div class="mt-panel-row">
+    <span class="mt-empty">Copy everything you've hearted on Spotify into a new playlist here.</span>
+    <form method="post" action="{% url 'spotify_import_liked' %}">
+      {% csrf_token %}
+      <button type="submit" class="mt-btn mt-btn-primary"><i class="fa fa-heart"></i> Import</button>
+    </form>
+  </div>
+</div>
+
+<div class="mt-panel-label">Your Spotify Playlists</div>
+
+{% if playlists %}
+<table class="mt-table" style="max-width:560px;">
+<thead>
+    <tr>
+    <th scope="col">Name</th>
+    <th scope="col">Tracks</th>
+    <th scope="col"></th>
+    </tr>
+</thead>
+<tbody>
+    {% for pl in playlists %}
+    <tr>
+        <td>{{ pl.name }}</td>
+        <td class="mt-empty">{{ pl.track_count }}</td>
+        <td>
+            <form method="post" action="{% url 'spotify_import_playlist' pl.id %}" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="playlist_name" value="{{ pl.name }}">
+                <button type="submit" class="mt-btn mt-btn-xs mt-btn-primary">Import</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+{% else %}
+<p class="mt-empty">No Spotify playlists found on your account.</p>
+{% endif %}
+
+{% endblock body %}

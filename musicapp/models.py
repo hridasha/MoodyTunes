@@ -50,10 +50,24 @@ class PlaylistGroup(models.Model):
         return self.name
 
 
+class SpotifyTrack(models.Model):
+    uri = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=500)
+    artist = models.CharField(max_length=500)
+    album = models.CharField(max_length=500, blank=True)
+    image = models.URLField(max_length=1000, blank=True)
+    external_url = models.URLField(max_length=1000, blank=True)
+
+    def __str__(self):
+        return f'{self.name} — {self.artist}'
+
+
 class Playlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     playlist_name = models.CharField(max_length=200)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, null=True, blank=True)
+    spotify_track = models.ForeignKey(
+        SpotifyTrack, on_delete=models.CASCADE, null=True, blank=True)
     position = models.PositiveIntegerField(default=0)
     group = models.ForeignKey(
         PlaylistGroup, on_delete=models.CASCADE, null=True, blank=True, related_name='items')

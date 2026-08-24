@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %} Playlist Songs {% endblock title %}
 {% block body %}
 
@@ -13,43 +14,54 @@
   <div class="mt-rule"></div>
 </section>
 
-<div style="max-width:480px; margin-bottom:24px; background:var(--surface); border-radius:12px; padding:16px;">
-  <div style="font-family: var(--font-mono); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Collaborators</div>
-  <p style="margin:0 0 10px 0;">Owner: {{group.owner.username}}</p>
+<div class="mt-panel">
+  <div class="mt-panel-label">Collaborators</div>
+  <div class="mt-panel-row">
+    <span>Owner: {{group.owner.username}}</span>
+  </div>
   {% for collaborator in group.collaborators.all %}
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+  <div class="mt-panel-row">
     <span>{{collaborator.username}}</span>
     {% if is_owner %}
-    <form method="post" style="display:inline;">
+    <form method="post">
       {% csrf_token %}
       <button type="submit" name="remove_collaborator" value="{{collaborator.id}}" class="mt-btn mt-btn-xs mt-btn-danger">Remove</button>
     </form>
     {% endif %}
   </div>
   {% empty %}
-  <p style="color: var(--text-muted); font-size:0.85rem;">No collaborators yet.</p>
+  <p class="mt-empty" style="font-size:0.85rem; margin: 6px 0 0 0;">No collaborators yet.</p>
   {% endfor %}
 
   {% if is_owner %}
-  <form method="post" style="display:flex; gap:6px; margin-top:10px;">
+  <form method="post">
     {% csrf_token %}
-    <input type="text" class="mt-input" name="add_collaborator" placeholder="Username" style="flex:1;" required>
+    <input type="text" class="mt-input" name="add_collaborator" placeholder="Username" required>
     <button type="submit" class="mt-btn mt-btn-primary">Add</button>
   </form>
   {% else %}
-  <form method="post" style="margin-top:10px;">
+  <form method="post">
     {% csrf_token %}
     <button type="submit" name="leave_playlist" value="1" class="mt-btn mt-btn-danger">Leave Playlist</button>
   </form>
   {% endif %}
 </div>
 
-{% if songs %}
-<p>
+{% if entries %}
+<div class="mt-actions">
   <button type="button" class="mt-btn mt-btn-primary" onclick="mtPlayAll()">Play All</button>
   <button type="button" class="mt-btn" onclick="mtShuffle()">Shuffle</button>
-</p>
+  {% if spotify_connected %}
+  <form method="post" action="{% url 'spotify_export_group' group.id %}">
+    {% csrf_token %}
+    <button type="submit" class="mt-btn"><i class="fa fa-spotify"></i> Export to Spotify</button>
+  </form>
+  {% endif %}
+</div>
 {% endif %}
+
+<div class="mt-status-line" id="mt-spotify-status"></div>
+<div class="mt-now-playing" id="mt-spotify-now-playing"></div>
 
 <table class="mt-table">
 <thead>
@@ -63,20 +75,29 @@
     </tr>
 </thead>
 <tbody>
-    {% for song in songs %}
+    {% for entry in entries %}
     <tr>
         <th scope="row">{{forloop.counter}}</th>
-        <td><a href="{% url 'detail' song.song_id %}">{{song.name}}</a></td>
-        <td>{{song.artist}}</td>
+        {% if entry.song %}
+        <td><a href="{% url 'detail' entry.song.song_id %}">{{entry.song.name}}</a></td>
+        <td>{{entry.song.artist}}</td>
         <td>
-            <audio controls><source src="{{ song.song_file.url }}" type="audio/mpeg"></audio>
+            <audio controls><source src="{{ entry.song.song_file.url }}" type="audio/mpeg"></audio>
         </td>
+        {% else %}
+        <td>{{entry.spotify_track.name}} <span class="mt-badge mt-badge--spotify" style="margin-left:4px;">Spotify</span></td>
+        <td>{{entry.spotify_track.artist}}</td>
         <td>
-            <form method="post" action="{% url 'move_playlist_song' group.id song.song_id 'up' %}" style="display:inline;">
+            <a href="#" class="mt-btn mt-btn-xs mt-spotify-play" data-uri="{{ entry.spotify_track.uri }}"><i class="fa fa-play"></i> Play</a>
+            <a href="{{ entry.spotify_track.external_url }}" target="_blank" rel="noopener" class="mt-btn mt-btn-xs" title="Open in Spotify"><i class="fa fa-external-link"></i></a>
+        </td>
+        {% endif %}
+        <td>
+            <form method="post" action="{% url 'move_playlist_song' group.id entry.id 'up' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="mt-btn mt-btn-xs" {% if forloop.first %}disabled{% endif %}>&uarr;</button>
             </form>
-            <form method="post" action="{% url 'move_playlist_song' group.id song.song_id 'down' %}" style="display:inline;">
+            <form method="post" action="{% url 'move_playlist_song' group.id entry.id 'down' %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit" class="mt-btn mt-btn-xs" {% if forloop.last %}disabled{% endif %}>&darr;</button>
             </form>
@@ -84,7 +105,7 @@
         <td>
             <form method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" name="remove_song" value="{{song.song_id}}" class="mt-btn mt-btn-xs mt-btn-danger">Remove</button>
+                <button type="submit" name="remove_entry" value="{{entry.id}}" class="mt-btn mt-btn-xs mt-btn-danger">Remove</button>
             </form>
         </td>
     </tr>
@@ -96,11 +117,28 @@
 <script>
   function mtPlayAll() {
     var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    if (!songs.length) return;
     MTPlayer.playQueue(songs, 0);
   }
   function mtShuffle() {
     var songs = JSON.parse(document.getElementById('songs-data').textContent);
+    if (!songs.length) return;
     MTPlayer.playQueue(MTPlayer.shuffleQueue(songs), 0);
   }
 </script>
+{% if spotify_connected %}
+<script src="{% static 'musicapp/js/spotify_player.js' %}"></script>
+<script>
+  MTSpotify.init({
+    status: document.getElementById('mt-spotify-status'),
+    nowPlaying: document.getElementById('mt-spotify-now-playing'),
+  });
+  document.querySelectorAll('.mt-spotify-play').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      MTSpotify.playTrack(link.dataset.uri);
+    });
+  });
+</script>
+{% endif %}
 {% endblock body %}

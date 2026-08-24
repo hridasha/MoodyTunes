@@ -15,23 +15,25 @@
 </section>
 
 {% if not configured %}
-<p style="color: var(--text-muted);">Spotify integration is not configured on this server (missing API credentials).</p>
+<p class="mt-empty">Spotify integration is not configured on this server (missing API credentials).</p>
 {% elif not connected %}
-<p style="color: var(--text-muted); max-width:480px;">
+<p class="mt-lede">
   Connect your Spotify account to search its catalog and play full tracks in-app.
   In-app playback needs Spotify Premium on the connected account (Web Playback SDK
   requirement) — accounts without Premium can still search and open results in Spotify.
   This app is in Spotify Development Mode, so only accounts allowlisted in the
   Spotify Developer Dashboard can connect.
 </p>
-<a href="{% url 'spotify_connect' %}" class="mt-btn mt-btn-primary" style="margin-top:12px;">
+<a href="{% url 'spotify_connect' %}" class="mt-btn mt-btn-primary">
   <i class="fa fa-spotify"></i> Connect Spotify
 </a>
 {% else %}
-<div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+<div class="mt-actions" style="align-items:center;">
   <span class="mt-badge {% if is_premium %}mt-badge--approved{% else %}mt-badge--pending{% endif %}">
     {% if is_premium %}Premium{% else %}{{ product|default:"Free" }}{% endif %}
   </span>
+  <a href="{% url 'spotify_import_hub' %}" class="mt-btn"><i class="fa fa-download"></i> Import from Spotify</a>
+  <a href="{% url 'spotify_mood_recommendations' %}" class="mt-btn"><i class="fa fa-magic"></i> Mood Picks</a>
   <form method="post" action="{% url 'spotify_disconnect' %}">
     {% csrf_token %}
     <button type="submit" class="mt-btn mt-btn-xs mt-btn-danger">Disconnect</button>
@@ -42,8 +44,8 @@
 <div class="mt-alert">Play-in-app requires Spotify Premium on this account. You can still search and open tracks in Spotify.</div>
 {% endif %}
 
-<div id="mt-spotify-status" style="color: var(--text-muted); font-size:0.85rem; margin-bottom:12px;"></div>
-<div id="mt-spotify-now-playing" style="font-family: var(--font-display); margin-bottom:20px; min-height:1.2em;"></div>
+<div class="mt-status-line" id="mt-spotify-status"></div>
+<div class="mt-now-playing" id="mt-spotify-now-playing"></div>
 
 <form class="mt-filter-bar" onsubmit="return mtSpotifySearch(event)">
   <input type="text" id="mt-spotify-query" class="mt-input" placeholder="Search Spotify for a song or artist">
@@ -64,16 +66,16 @@
     var q = document.getElementById('mt-spotify-query').value.trim();
     var results = document.getElementById('mt-spotify-results');
     if (!q) return false;
-    results.innerHTML = '<p style="color: var(--text-muted);">Searching…</p>';
+    results.innerHTML = '<p class="mt-empty">Searching…</p>';
     fetch('{% url "spotify_search" %}?q=' + encodeURIComponent(q))
       .then(function (resp) { return resp.json(); })
       .then(function (data) {
         if (data.error) {
-          results.innerHTML = '<p style="color: var(--text-muted);">' + data.error + '</p>';
+          results.innerHTML = '<p class="mt-empty">' + data.error + '</p>';
           return;
         }
         if (!data.tracks.length) {
-          results.innerHTML = '<p style="color: var(--text-muted);">No results.</p>';
+          results.innerHTML = '<p class="mt-empty">No results.</p>';
           return;
         }
         results.innerHTML = '';
@@ -98,7 +100,7 @@
         });
       })
       .catch(function () {
-        results.innerHTML = '<p style="color: var(--text-muted);">Search failed.</p>';
+        results.innerHTML = '<p class="mt-empty">Search failed.</p>';
       });
     return false;
   }
